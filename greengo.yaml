@@ -1,0 +1,90 @@
+# Greeengrass Group definition file
+Group:
+  name: EscapeRoomGroup
+
+Cores:
+  - name: EscapeRoomGroup_core
+    key_path: ./certs
+    config_path: ./config
+    SyncShadow: False
+
+Lambdas:
+  - name: ClockMatrix
+    handler: function.lambda_handler
+    package: lambdas/ClockMatrix
+    alias: dev
+    greengrassConfig:
+      MemorySize: 128000 # Kb, ask AWS why
+      Timeout: 10 # Sec
+      Pinned: True # Set True for long-lived functions
+      Environment:
+        AccessSysfs: True
+        ResourceAccessPolicies:
+          - ResourceId: gpiomem
+            Permission: 'rw'
+          - ResourceId: spidev00
+            Permission: 'rw'
+          - ResourceId: spidev01
+            Permission: 'rw'
+
+  - name: GreengrassHelloWorld
+    handler: function.handler
+    package: lambdas/GreengrassHelloWorld
+    alias: dev
+    greengrassConfig:
+      MemorySize: 128000 # Kb, ask AWS why
+      Timeout: 10 # Sec
+      Pinned: True # Set True for long-lived functions
+      Environment:
+        AccessSysfs: False
+
+  - name: GreengrassHelloWorldCounter
+    handler: function.handler
+    package: lambdas/GreengrassHelloWorldCounter
+    alias: dev
+    greengrassConfig:
+      MemorySize: 128000 # Kb, ask AWS why
+      Timeout: 25 # Sec
+      Pinned: True # Set True for long-lived functions
+      Environment:
+        AccessSysfs: False
+
+Subscriptions:
+  - Source: Lambda::ClockMatrix
+    Subject: data/er/EscapeRoomGroup_core/monitoring
+    Target: cloud
+
+  - Source: Lambda::GreengrassHelloWorld
+    Subject: hello/world
+    Target: cloud
+
+  - Source: Lambda::GreengrassHelloWorldCounter
+    Subject: hello/world/counter
+    Target: cloud
+
+  - Source: cloud
+    Subject: hello/world/counter/trigger
+    Target: Lambda::GreengrassHelloWorldCounter
+
+Resources:
+  # Resource as defined at http://boto3.readthedocs.io/en/latest/reference/services/greengrass.html#Greengrass.Client.create_resource_definition_version
+  - Name: gpiomem
+    Id: gpiomem
+    LocalDeviceResourceData:
+      SourcePath: /dev/gpiomem
+      GroupOwnerSetting:
+        AutoAddGroupOwner: True
+
+  - Name: spidev00
+    Id: spidev00
+    LocalDeviceResourceData:
+      SourcePath: /dev/spidev0.0
+      GroupOwnerSetting:
+        AutoAddGroupOwner: True
+
+  - Name: spidev01
+    Id: spidev01
+    LocalDeviceResourceData:
+      SourcePath: /dev/spidev0.1
+      GroupOwnerSetting:
+        AutoAddGroupOwner: True
