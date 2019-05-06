@@ -25,8 +25,8 @@ from luma.core.legacy.font import proportional, CP437_FONT, LCD_FONT
 from threading import Timer
 
 # globals
-code = ''  # '{}'.format(os.environ['ESCAPE_CODE'])
-display_mode = ''  # ''{}'.format(os.environ['ESCAPE_DISPLAY_MODE'])
+code = '{}'.format(os.environ['ESCAPE_CODE'])
+display_mode = '{}'.format(os.environ['ESCAPE_DISPLAY_MODE'])
 topic = 'data/er/{}/monitoring'.format(os.environ['AWS_IOT_THING_NAME'])
 
 show_code = False
